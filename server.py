@@ -32,8 +32,8 @@ def book(competition,club):
         return render_template('welcome.html', club=club, competitions=competitions)
 
 
-@app.route('/purchase_place',methods=['POST'])
-def purchase_place():
+@app.route('/purchasePlaces',methods=['POST'])
+def purchasePlaces():
     competition_name = request.form['competition']
     competition = find_competition_by_name(name = competition_name)
     club_name = request.form["club"]
@@ -48,9 +48,16 @@ def purchase_place():
     return render_template('welcome.html', club=club, competitions=competitions)
 
 
-# TODO: Add route for points display
+
+@app.route('/clubs/points', methods=['GET'])
+def display_points():
+    return render_template('club_points.html', clubs=clubs)
 
 
 @app.route('/logout')
 def logout():
     return redirect(url_for('index'))
+
+
+if __name__ == "__main__" : 
+    app.run()
