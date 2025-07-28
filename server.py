@@ -1,26 +1,15 @@
 import json
 from datetime import datetime
 from flask import Flask,render_template,request,redirect,flash,url_for
-from utils.utils import find_competition_by_name, is_competition_in_past
+from utils.utils import find_competition_by_name, is_competition_in_past, load_clubs, load_competitions
 
-
-def loadClubs():
-    with open('clubs.json') as c:
-         listOfClubs = json.load(c)['clubs']
-         return listOfClubs
-
-
-def loadCompetitions():
-    with open('competitions.json') as comps:
-         listOfCompetitions = json.load(comps)['competitions']
-         return listOfCompetitions
 
 
 app = Flask(__name__)
 app.secret_key = 'something_special'
 
-competitions = loadCompetitions()
-clubs = loadClubs()
+competitions = load_competitions()
+clubs = load_clubs()
 
 @app.route('/')
 def index():
