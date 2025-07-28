@@ -1,17 +1,11 @@
 import json
 from flask import Flask,render_template,request,redirect,flash,url_for
+from utils.utils import (
+    find_club_by_email,
+    loadClubs,
+    loadCompetitions
+)
 
-
-def loadClubs():
-    with open('clubs.json') as c:
-         listOfClubs = json.load(c)['clubs']
-         return listOfClubs
-
-
-def loadCompetitions():
-    with open('competitions.json') as comps:
-         listOfCompetitions = json.load(comps)['competitions']
-         return listOfCompetitions
 
 
 app = Flask(__name__)
@@ -20,14 +14,22 @@ app.secret_key = 'something_special'
 competitions = loadCompetitions()
 clubs = loadClubs()
 
+welcome_page = 'welcome.html'
+
 @app.route('/')
 def index():
     return render_template('index.html')
 
 @app.route('/showSummary',methods=['POST'])
+
 def showSummary():
-    club = [club for club in clubs if club['email'] == request.form['email']][0]
-    return render_template('welcome.html',club=club,competitions=competitions)
+    email = request.form["email"]
+    matched_club = find_club_by_email(email= email, clubs=clubs)
+    if matched_club is None: 
+        flash("ERROR : Unknown e-mail")
+        return redirect(url_for('index'))
+    return render_template(welcome_page, club=matched_club ,competitions=competitions)
+
 
 
 @app.route('/book/<competition>/<club>')
@@ -57,3 +59,7 @@ def purchasePlaces():
 @app.route('/logout')
 def logout():
     return redirect(url_for('index'))
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
