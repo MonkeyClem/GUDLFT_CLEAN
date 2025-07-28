@@ -1,7 +1,9 @@
 import json
 from flask import Flask,render_template,request,redirect,flash,url_for
 from utils.utils import (
+    exceed_club_points,
     find_club_by_email,
+    find_club_by_name,
     loadClubs,
     loadCompetitions
 )
@@ -12,8 +14,8 @@ from utils.utils import exceeds_max_places_per_booking, loadClubs, loadCompetiti
 app = Flask(__name__)
 app.secret_key = 'something_special'
 
-competitions = loadCompetitions()
-clubs = loadClubs()
+competitions = load_competitions()
+clubs = load_clubs()
 
 
 WELCOME_PAGE = "welcome.html"
@@ -44,18 +46,27 @@ def book(competition,club):
         return render_template(WELCOME_PAGE, club=club, competitions=competitions)
 
 
-@app.route('/purchase_places',methods=['POST'])
-def purchase_places():
-    competition = [c for c in competitions if c['name'] == request.form['competition']][0]
-    club = [c for c in clubs if c['name'] == request.form['club']][0]
-    places_required = int(request.form['places'])
-    if exceeds_max_places_per_booking(places_required):
-        flash("ERROR: You can not book more than 12 places")
-        return redirect(url_for('book', club=club["name"], competition=competition["name"]))
+@app.route('/purchasePlaces',methods=['POST'])
+def purchasePlaces():
+    competition_name = request.form['competition']
+    competition = next((c for c in competitions if c['name'] == competition_name), None)
+    if not competition:
+        flash("ERROR: Competition not found.")
+        return redirect(url_for('showSummary'))
+    club_name = request.form["club"]
+    club = find_club_by_name(club_name=club_name)
+    club_available_points = int(club['points'])
+    print("club_available_points => ", club_available_points)
+    placesRequired = int(request.form['places'])
+    if exceed_club_points(required_places=placesRequired, club_available_points=club_available_points):
+        flash("ERROR: You do not have enough points to book these places.")
+        return redirect(url_for('book', club=club_name, competition=request.form['competition']))
+    else :
+        competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - placesRequired
+        club['points'] = club_available_points - placesRequired
+        flash('Great-booking complete!')
+        return render_template('welcome.html', club=club, competitions=competitions)
 
-    competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-places_required
-    flash('Great-booking complete!')
-    return render_template(WELCOME_PAGE, club=club, competitions=competitions)
 
 
 # TODO: Add route for points display
@@ -66,6 +77,5 @@ def logout():
     return redirect(url_for('index'))
 
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(debug=True)
