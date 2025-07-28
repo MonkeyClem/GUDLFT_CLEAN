@@ -1,14 +1,11 @@
 import json
 from flask import Flask,render_template,request,redirect,flash,url_for
-<<<<<<< HEAD
 from utils.utils import (
     find_club_by_email,
     loadClubs,
     loadCompetitions
 )
-=======
 from utils.utils import exceeds_max_places_per_booking, loadClubs, loadCompetitions
->>>>>>> fix/max-places-12
 
 
 
