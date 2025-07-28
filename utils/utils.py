@@ -14,3 +14,6 @@ def loadCompetitions():
 
 def find_club_by_email(email, clubs):
     return next((club for club in clubs if club["email"] == email), None)
+
+def exceeds_max_places_per_booking(places_requested, max_places=12):
+    return places_requested > max_places
