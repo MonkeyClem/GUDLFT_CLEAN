@@ -1,5 +1,6 @@
 import json
 from flask import Flask,render_template,request,redirect,flash,url_for
+from utils.utils import  validate_places_request
 
 
 def loadClubs():
@@ -33,7 +34,7 @@ def showSummary():
 @app.route('/book/<competition>/<club>')
 def book(competition,club):
     foundClub = [c for c in clubs if c['name'] == club][0]
-    foundCompetition = [c for c in competitions if c['name'] == competition][0]
+    foundCompetition = [c for c in competitions if c['name'] == competition]
     if foundClub and foundCompetition:
         return render_template('booking.html',club=foundClub,competition=foundCompetition)
     else:
@@ -43,9 +44,14 @@ def book(competition,club):
 
 @app.route('/purchasePlaces',methods=['POST'])
 def purchasePlaces():
-    competition = [c for c in competitions if c['name'] == request.form['competition']][0]
+    print("Form competition name:", request.form['competition'])
+    competition = [c for c in competitions if c['name'] == request.form['competition']]
     club = [c for c in clubs if c['name'] == request.form['club']][0]
     placesRequired = int(request.form['places'])
+    error_msg = validate_places_request(placesRequired, int(competition['numberOfPlaces']))
+    if error_msg:
+        flash(error_msg)
+        return redirect(url_for("book", competition=competition_name, club=club_name))
     competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-placesRequired
     flash('Great-booking complete!')
     return render_template('welcome.html', club=club, competitions=competitions)
@@ -57,3 +63,7 @@ def purchasePlaces():
 @app.route('/logout')
 def logout():
     return redirect(url_for('index'))
+
+
+if __name__ == "__main__" : 
+    app.run()
