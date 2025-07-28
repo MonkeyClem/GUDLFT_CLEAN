@@ -1,4 +1,4 @@
-from utils import find_club_by_email, loadClubs
+from utils.utils import find_club_by_email, loadClubs
 
 def test_find_club_by_email_valid():
     clubs = loadClubs()

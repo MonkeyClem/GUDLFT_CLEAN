@@ -20,9 +20,9 @@ welcome_page = 'welcome.html'
 def index():
     return render_template('index.html')
 
-@app.route('/showSummary',methods=['POST'])
+@app.route('/show_summary',methods=['POST'])
 
-def showSummary():
+def show_summary():
     email = request.form["email"]
     matched_club = find_club_by_email(email= email, clubs=clubs)
     if matched_club is None: 
