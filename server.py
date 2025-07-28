@@ -5,6 +5,8 @@ from utils.utils import (
     exceed_club_points,
     find_club_by_email,
     find_club_by_name,
+    is_competition_in_past,
+    is_points_balance_valid,
     loadClubs,
     loadCompetitions
 )
@@ -38,13 +40,19 @@ def show_summary():
 
 @app.route('/book/<competition>/<club>')
 def book(competition,club):
-    foundClub = [c for c in clubs if c['name'] == club][0]
-    foundCompetition = [c for c in competitions if c['name'] == competition][0]
+    # foundClub = [c for c in clubs if c['name'] == club]
+    foundClub = next((c for c in clubs if c['name'] == club), None)
+    foundCompetition = [c for c in competitions if c['name'] == competition]
+    foundCompetition = foundCompetition[0] if foundCompetition else None
+
+    print("\n \n \n \n \nRendering booking.html with competition =", repr(foundCompetition), "\n \n")
+    print("\n \n \n \n \nRendering booking.html with club =", repr(foundClub), "\n \n")
+
     if foundClub and foundCompetition:
-        return render_template('booking.html',club=foundClub,competition=foundCompetition)
+        return render_template('booking.html', club=foundClub, competition=foundCompetition)
     else:
         flash("Something went wrong-please try again")
-        return render_template(WELCOME_PAGE, club=club, competitions=competitions)
+        return render_template(WELCOME_PAGE, club=foundClub, competitions=competitions)
 
 
 @app.route('/purchasePlaces',methods=['POST'])
