@@ -33,25 +33,36 @@ def showSummary():
 
 @app.route('/book/<competition>/<club>')
 def book(competition,club):
-    foundClub = [c for c in clubs if c['name'] == club][0]
+    foundClub = [c for c in clubs if c['name'] == club]
     foundCompetition = [c for c in competitions if c['name'] == competition]
+    foundCompetition = foundCompetition[0] if foundCompetition else None
+
+    print("\n \n \n \n \nRendering booking.html with competition =", repr(foundCompetition), "\n \n")
+    print("\n \n \n \n \nRendering booking.html with club =", repr(foundClub), "\n \n")
+
+
     if foundClub and foundCompetition:
         return render_template('booking.html',club=foundClub,competition=foundCompetition)
     else:
         flash("Something went wrong-please try again")
-        return render_template('welcome.html', club=club, competitions=competitions)
+        return render_template('welcome.html', club=foundClub, competitions=competitions)
 
 
 @app.route('/purchasePlaces',methods=['POST'])
 def purchasePlaces():
-    print("Form competition name:", request.form['competition'])
-    competition = [c for c in competitions if c['name'] == request.form['competition']]
-    club = [c for c in clubs if c['name'] == request.form['club']][0]
+    # competition = [c for c in competitions if c['name'] == request.form['competition']]
+    competition = next((c for c in competitions if c['name'] == request.form['competition']), None)
+    print("\n=== FORM DEBUG ===")
+    print("request.form:", request.form)
+    print("Keys:", list(request.form.keys()))
+    print("Values:", [request.form.get(k) for k in request.form])
+    print("==================\n")
+    club = [c for c in clubs if c['name'] == request.form['club']]
     placesRequired = int(request.form['places'])
     error_msg = validate_places_request(placesRequired, int(competition['numberOfPlaces']))
     if error_msg:
         flash(error_msg)
-        return redirect(url_for("book", competition=competition_name, club=club_name))
+        return redirect(url_for("book", competition=competition["name"], club=club))
     competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-placesRequired
     flash('Great-booking complete!')
     return render_template('welcome.html', club=club, competitions=competitions)
