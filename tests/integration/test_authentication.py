@@ -5,7 +5,7 @@ def test_valid_email():
     with app.test_client() as client:
         response = client.post('/show_summary', data={'email': 'john@simplylift.co'})
         assert response.status_code == 200
-        assert b"Welcome" in response.data or b"Points" in response.data  # à adapter selon ton template
+        assert b"Welcome" in response.data or b"Points" in response.data  
 
 
 def test_invalid_email_redirect():

@@ -21,7 +21,6 @@ def index():
     return render_template('index.html')
 
 @app.route('/show_summary',methods=['POST'])
-
 def show_summary():
     email = request.form["email"]
     matched_club = find_club_by_email(email= email, clubs=clubs)
