@@ -1,5 +1,5 @@
 import json 
-
+from datetime import datetime
 def loadClubs():
     with open('clubs.json') as c:
          list_of_clubs = json.load(c)['clubs']
@@ -28,3 +28,15 @@ def exceed_club_points(required_places ,club_available_points):
 
 def find_club_by_name(club_name : str):
     return next((club for club in clubs if club["name"] == club_name))
+
+
+def find_competition_by_name(name):
+    for c in competitions:
+        if c["name"] == name:
+            return c
+    return None
+
+
+def is_competition_in_past(competition_date): 
+    return competition_date < datetime.now()
+

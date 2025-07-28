@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from flask import Flask,render_template,request,redirect,flash,url_for
 from utils.utils import (
     exceed_club_points,
@@ -14,8 +15,8 @@ from utils.utils import exceeds_max_places_per_booking, loadClubs, loadCompetiti
 app = Flask(__name__)
 app.secret_key = 'something_special'
 
-competitions = loadCompetitions()
-clubs = loadClubs()
+competitions = load_competitions()
+clubs = load_clubs()
 
 
 WELCOME_PAGE = "welcome.html"
