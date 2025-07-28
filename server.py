@@ -59,6 +59,14 @@ def purchasePlaces():
     club_available_points = int(club['points'])
     print("club_available_points => ", club_available_points)
     placesRequired = int(request.form['places'])
+    competition_date= datetime.strptime(competition["date"], "%Y-%m-%d %H:%M:%S")
+    if is_competition_in_past(competition_date):
+        flash("ERROR: This competition is not available anymore... Sorry")
+        return redirect(url_for('book', club=club_name, competition=competition_name))
+    places_required = int(request.form['places'])
+    if not is_points_balance_valid(club, places_required):
+        flash(f"ERROR: You do not have enough points. Your current balance: {club['points']}")
+        return redirect(url_for('book', club=club_name, competition=competition_name))
     if exceed_club_points(required_places=placesRequired, club_available_points=club_available_points):
         flash("ERROR: You do not have enough points to book these places.")
         return redirect(url_for('book', club=club_name, competition=request.form['competition']))
