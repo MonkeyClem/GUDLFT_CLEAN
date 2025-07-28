@@ -5,3 +5,24 @@ lib
 tests/
 .envrc
 __pycache__
+
+env/
+venv/
+
+# Fichiers Python temporaires
+__pycache__/
+*.pyc
+*.pyo
+
+# Fichiers d'environnement
+.env
+
+# Cache de tests
+htmlcov/
+coverage.xml
+.cache/
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
