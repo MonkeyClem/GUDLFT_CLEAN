@@ -39,4 +39,4 @@ def validate_places_request(places_required: int, available_places: int) -> str:
         return "ERROR: You must book at least 1 place."
     if places_required > available_places:
         return "ERROR: Not enough places available in this competition."
-    return ""
+    return None

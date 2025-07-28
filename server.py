@@ -28,21 +28,22 @@ def index():
 @app.route('/showSummary',methods=['POST'])
 def showSummary():
     club = [club for club in clubs if club['email'] == request.form['email']][0]
+    # club = next((club for club in clubs if club["name"] == request.form["name"]))
     return render_template('welcome.html',club=club,competitions=competitions)
 
 
 @app.route('/book/<competition>/<club>')
 def book(competition,club):
-    foundClub = [c for c in clubs if c['name'] == club]
+    # foundClub = [c for c in clubs if c['name'] == club]
+    foundClub = next((c for c in clubs if c['name'] == club), None)
     foundCompetition = [c for c in competitions if c['name'] == competition]
     foundCompetition = foundCompetition[0] if foundCompetition else None
 
     print("\n \n \n \n \nRendering booking.html with competition =", repr(foundCompetition), "\n \n")
     print("\n \n \n \n \nRendering booking.html with club =", repr(foundClub), "\n \n")
 
-
     if foundClub and foundCompetition:
-        return render_template('booking.html',club=foundClub,competition=foundCompetition)
+        return render_template('booking.html', club=foundClub, competition=foundCompetition)
     else:
         flash("Something went wrong-please try again")
         return render_template('welcome.html', club=foundClub, competitions=competitions)
@@ -57,7 +58,12 @@ def purchasePlaces():
     print("Keys:", list(request.form.keys()))
     print("Values:", [request.form.get(k) for k in request.form])
     print("==================\n")
-    club = [c for c in clubs if c['name'] == request.form['club']]
+    club_name = request.form.get('club')
+    club = next((c for c in clubs if c['name'] == club_name), None)
+    if not club:
+        flash("ERROR: Club not found.")
+        return redirect(url_for("index"))
+    # club = next((club for club in clubs if club["name"] == request.form["name"]))
     placesRequired = int(request.form['places'])
     error_msg = validate_places_request(placesRequired, int(competition['numberOfPlaces']))
     if error_msg:
