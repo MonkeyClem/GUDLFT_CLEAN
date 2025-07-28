@@ -15,8 +15,8 @@ from utils.utils import exceeds_max_places_per_booking, loadClubs, loadCompetiti
 app = Flask(__name__)
 app.secret_key = 'something_special'
 
-competitions = load_competitions()
-clubs = load_clubs()
+competitions = loadCompetitions()
+clubs = loadClubs()
 
 
 WELCOME_PAGE = "welcome.html"
@@ -70,7 +70,10 @@ def purchasePlaces():
 
 
 
-# TODO: Add route for points display
+
+@app.route('/clubs/points', methods=['GET'])
+def display_points():
+    return render_template('club_points.html', clubs=clubs)
 
 
 @app.route('/logout')
