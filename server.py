@@ -1,5 +1,7 @@
 import json
+from datetime import datetime
 from flask import Flask,render_template,request,redirect,flash,url_for
+from utils.utils import find_competition_by_name, is_competition_in_past
 
 
 def loadClubs():
@@ -41,12 +43,18 @@ def book(competition,club):
         return render_template('welcome.html', club=club, competitions=competitions)
 
 
-@app.route('/purchasePlaces',methods=['POST'])
-def purchasePlaces():
-    competition = [c for c in competitions if c['name'] == request.form['competition']][0]
-    club = [c for c in clubs if c['name'] == request.form['club']][0]
-    placesRequired = int(request.form['places'])
-    competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-placesRequired
+@app.route('/purchase_place',methods=['POST'])
+def purchase_place():
+    competition_name = request.form['competition']
+    competition = find_competition_by_name(name = competition_name)
+    club_name = request.form["club"]
+    competition_date= datetime.strptime(competition["date"], "%Y-%m-%d %H:%M:%S")
+    if is_competition_in_past(competition_date):
+        flash("ERROR: This competition is not available anymore... Sorry")
+        return redirect(url_for('book', club=club_name, competition=competition_name))
+    club = [c for c in clubs if c['name'] == request.form['club']]
+    places_required = int(request.form['places'])
+    competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-places_required
     flash('Great-booking complete!')
     return render_template('welcome.html', club=club, competitions=competitions)
 
