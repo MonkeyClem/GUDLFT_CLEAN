@@ -56,7 +56,7 @@
 
 # GUDLFT ADDITIONAL INFO
 
-## 1. 🔍 Project Purpose
+## 1. Project Purpose
 This is a **proof of concept (POC)** to demonstrate a lightweight version of GUDLFT's club competition booking system.  
 The goal is to:
 - Allow clubs to log in
@@ -66,7 +66,7 @@ The goal is to:
 
 ---
 
-## 2. 🚀 Technologies Used
+## 2. Technologies Used
 - Python 3.10+
 - [Flask](https://flask.palletsprojects.com/)
 - JSON for data storage (no DB)
