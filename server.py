@@ -71,11 +71,6 @@ def purchase_places():
     if exceeds_max_places_per_booking(places_required):
         flash("ERROR: You cannot book more than 12 places per competition.")
         return render_template(BOOKING_PAGE, club=club, competition=competition)
-    if not is_points_balance_valid(club, places_required):
-        flash(
-            f"ERROR: You do not have enough points. Your current balance: {club['points']}"
-        )
-        return render_template(BOOKING_PAGE, club=club, competition=competition)
     if exceed_club_points(
         required_places=places_required, club_available_points=club_available_points
     ):
