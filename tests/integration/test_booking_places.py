@@ -53,7 +53,7 @@ def test_booking_insufficient_points_should_fail():
             'competition': 'Test Weight',
             'places': '5'
         }, follow_redirects=True)
-        assert b"ERROR: You do not have enough points." in response.data
+        assert b"ERROR: You do not have enough points to book these places." in response.data
 
 def test_booking_past_competition_should_fail():
     with app.test_client() as client:
