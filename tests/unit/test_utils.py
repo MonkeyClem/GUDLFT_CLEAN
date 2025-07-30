@@ -1,6 +1,8 @@
 from utils.utils import find_club_by_email, load_clubs, is_competition_in_past
 from server import app
 from datetime import datetime, timedelta
+from flask.testing import FlaskClient
+
 
 def test_find_club_by_email_valid():
     clubs = load_clubs()
