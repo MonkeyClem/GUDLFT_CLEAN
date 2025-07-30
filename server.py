@@ -67,7 +67,11 @@ def purchase_places():
     if is_competition_in_past(competition_date):
         flash("ERROR: This competition is not available anymore... Sorry")
         return render_template(BOOKING_PAGE, club=club, competition=competition)
-    places_required = int(request.form["places"])
+    places_required = int(request.form['places'])
+    error_msg = validate_places_request(places_required, int(competition['numberOfPlaces']))
+    if error_msg:
+        flash(error_msg)
+        return redirect(url_for("book", competition=competition["name"], club=club))
     if exceeds_max_places_per_booking(places_required):
         flash("ERROR: You cannot book more than 12 places per competition.")
         return render_template(BOOKING_PAGE, club=club, competition=competition)
