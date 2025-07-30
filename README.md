@@ -49,3 +49,40 @@
     We also like to show how well we're testing, so there's a module called 
     [coverage](https://coverage.readthedocs.io/en/coverage-5.1/) you should add to your project.
 
+
+
+
+
+
+# GUDLFT ADDITIONAL INFO
+
+## 1. 🔍 Project Purpose
+This is a **proof of concept (POC)** to demonstrate a lightweight version of GUDLFT's club competition booking system.  
+The goal is to:
+- Allow clubs to log in
+- Book places in upcoming competitions
+- Track their remaining points
+- Restrict booking logic based on business rules (points, dates, limits)
+
+---
+
+## 2. 🚀 Technologies Used
+- Python 3.10+
+- [Flask](https://flask.palletsprojects.com/)
+- JSON for data storage (no DB)
+- `pytest` & `pytest-cov` for testing and code coverage
+- Virtualenv for isolated environments
+
+--- 
+## 3. ⚙️ Installation Instructions
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/GUDLFT_CLEAN.git
+cd GUDLFT_CLEAN
+
+# Create virtual environment
+python -m venv env
+source env/bin/activate  # On Windows: env\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt

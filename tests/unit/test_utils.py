@@ -1,17 +1,15 @@
-from utils.utils import find_club_by_email, loadClubs, is_competition_in_past
+from utils.utils import find_club_by_email, load_clubs, is_competition_in_past
 from server import app
 from datetime import datetime, timedelta
-import pytest_cov
-print("pytest-cov is installed and importable.")
 
 def test_find_club_by_email_valid():
-    clubs = loadClubs()
+    clubs = load_clubs()
     result = find_club_by_email("john@simplylift.co", clubs)
     assert result is not None
     assert result['name'] == 'Simply Lift'
 
 def test_find_club_by_email_invalid():
-    clubs = loadClubs()
+    clubs = load_clubs()
     result = find_club_by_email("notfound@email.com", clubs)
     assert result is None
 
