@@ -51,19 +51,12 @@ def book(competition,club):
 
 @app.route('/purchasePlaces',methods=['POST'])
 def purchasePlaces():
-    # competition = [c for c in competitions if c['name'] == request.form['competition']]
     competition = next((c for c in competitions if c['name'] == request.form['competition']), None)
-    print("\n=== FORM DEBUG ===")
-    print("request.form:", request.form)
-    print("Keys:", list(request.form.keys()))
-    print("Values:", [request.form.get(k) for k in request.form])
-    print("==================\n")
     club_name = request.form.get('club')
     club = next((c for c in clubs if c['name'] == club_name), None)
     if not club:
         flash("ERROR: Club not found.")
         return redirect(url_for("index"))
-    # club = next((club for club in clubs if club["name"] == request.form["name"]))
     placesRequired = int(request.form['places'])
     error_msg = validate_places_request(placesRequired, int(competition['numberOfPlaces']))
     if error_msg:
