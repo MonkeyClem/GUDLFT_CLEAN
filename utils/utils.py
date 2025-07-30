@@ -47,10 +47,3 @@ def is_points_balance_valid(club: dict, places_required: int) -> bool:
         club['points'] = str(club_points - places_required) 
         return True
     return False
-
-def validate_places_request(places_required: int, available_places: int) -> str:
-    if places_required <= 0:
-        return "ERROR: You must book at least 1 place."
-    if places_required > available_places:
-        return "ERROR: Not enough places available in this competition."
-    return None

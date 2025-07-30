@@ -8,7 +8,7 @@ from utils.utils import (
     is_competition_in_past,
     is_points_balance_valid,
     loadClubs,
-    loadCompetitions
+    loadCompetitions,
 )
 from utils.utils import exceeds_max_places_per_booking, loadClubs, loadCompetitions
 
@@ -44,10 +44,6 @@ def book(competition,club):
     foundClub = next((c for c in clubs if c['name'] == club), None)
     foundCompetition = [c for c in competitions if c['name'] == competition]
     foundCompetition = foundCompetition[0] if foundCompetition else None
-
-    print("\n \n \n \n \nRendering booking.html with competition =", repr(foundCompetition), "\n \n")
-    print("\n \n \n \n \nRendering booking.html with club =", repr(foundClub), "\n \n")
-
     if foundClub and foundCompetition:
         return render_template('booking.html', club=foundClub, competition=foundCompetition)
     else:
@@ -61,28 +57,35 @@ def purchasePlaces():
     competition = next((c for c in competitions if c['name'] == competition_name), None)
     if not competition:
         flash("ERROR: Competition not found.")
-        return redirect(url_for('showSummary'))
+        return redirect(url_for('index'))
     club_name = request.form["club"]
     club = find_club_by_name(club_name=club_name)
     club_available_points = int(club['points'])
-    print("club_available_points => ", club_available_points)
-    placesRequired = int(request.form['places'])
     competition_date= datetime.strptime(competition["date"], "%Y-%m-%d %H:%M:%S")
     if is_competition_in_past(competition_date):
         flash("ERROR: This competition is not available anymore... Sorry")
-        return redirect(url_for('book', club=club_name, competition=competition_name))
+        return render_template("booking.html", club=club, competition=competition)
     places_required = int(request.form['places'])
+    if exceeds_max_places_per_booking(places_required):
+        flash("ERROR: You cannot book more than 12 places per competition.")
+        return render_template("booking.html", club=club, competition=competition)
     if not is_points_balance_valid(club, places_required):
         flash(f"ERROR: You do not have enough points. Your current balance: {club['points']}")
-        return redirect(url_for('book', club=club_name, competition=competition_name))
-    if exceed_club_points(required_places=placesRequired, club_available_points=club_available_points):
+        return render_template("booking.html", club=club, competition=competition)
+    if exceed_club_points(required_places=places_required, club_available_points=club_available_points):
         flash("ERROR: You do not have enough points to book these places.")
-        return redirect(url_for('book', club=club_name, competition=request.form['competition']))
+        return render_template("booking.html", club=club, competition=competition)
+    if places_required <= 0:
+        flash("You must book at least 1 place")
+        return render_template("booking.html", club=club, competition=competition)
+    if places_required > int(competition["numberOfPlaces"]):
+        flash("Not enough places available")
+        return render_template("booking.html", club=club, competition=competition)
     else :
-        competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - placesRequired
-        club['points'] = club_available_points - placesRequired
+        competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - places_required
+        club['points'] = club_available_points - places_required
         flash('Great-booking complete!')
-        return render_template('welcome.html', club=club, competitions=competitions)
+        return render_template(WELCOME_PAGE, club=club, competitions=competitions)
 
 
 @app.route('/clubs/points', methods=['GET'])
