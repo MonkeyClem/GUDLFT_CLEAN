@@ -68,7 +68,7 @@ def purchase_places():
     if is_competition_in_past(competition_date):
         flash("This competition is not available anymore... Sorry")
         return render_template(BOOKING_PAGE, club=club, competition=competition)
-    places_required = int(request.form['places'])
+    places_required = request.form['places']
     error_msg = validate_places_request(places_required)
     if error_msg:
         flash(error_msg)
