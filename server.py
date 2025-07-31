@@ -73,6 +73,7 @@ def purchase_places():
     if error_msg:
         flash(error_msg)
         return render_template(BOOKING_PAGE,competition=competition, club=club )
+    places_required = int(request.form['places'])
     if exceeds_max_places_per_booking(places_required):
         flash("You cannot book more than 12 places per competition.")
         return render_template(BOOKING_PAGE, club=club, competition=competition)

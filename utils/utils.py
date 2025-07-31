@@ -37,14 +37,19 @@ def is_competition_in_past(competition_date):
 
 
 def validate_places_request(places_required: int | str) -> str | None:
+    if isinstance(places_required, str):
+        places_required = places_required.strip()  
+
     try:
         places_required = int(places_required)
     except (ValueError, TypeError):
-        return "You must book at least 1 place." 
-
+        return "You must book at least 1 place."
+    
     if places_required <= 0:
         return "You must book at least 1 place."
+
     return None
+
 
 def check_places_availability(places_required: int, competition: dict) -> str | None:
     if places_required > int(competition["numberOfPlaces"]):
