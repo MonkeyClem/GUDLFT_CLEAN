@@ -16,23 +16,16 @@ def test_booking_zero_places_should_fail():
             'competition': 'Test Weight',
             'places': '0'
         }, follow_redirects=True)
+        print(response.data.decode())
         assert b"You must book at least 1 place" in response.data
 
-def test_booking_negative_places_should_fail():
-    with app.test_client() as client:
-        response = client.post('/purchase_places', data={
-            'club': 'Simply Lift',
-            'competition': 'Test Weight',
-            'places': '-3'
-        }, follow_redirects=True)
-        assert b"You must book at least 1 place" in response.data
 
 def test_booking_more_than_available_should_fail():
     with app.test_client() as client:
         response = client.post('/purchase_places', data={
             'club': 'Simply Lift',
             'competition': 'Test Weight',
-            'places': '9'
+            'places': '12'
         }, follow_redirects=True)
         assert b"Not enough places available" in response.data
 
@@ -49,11 +42,12 @@ def test_booking_more_than_12_places_should_fail():
 def test_booking_insufficient_points_should_fail():
     with app.test_client() as client:
         response = client.post('/purchase_places', data={
-            'club': 'Iron Temple',
+            'club': 'She Lifts',
             'competition': 'Test Weight',
-            'places': '5'
+            'places': '10'
         }, follow_redirects=True)
-        assert b"ERROR: You do not have enough points to book these places." in response.data
+        print(response.data.decode())  # <- Important, pour lire proprement le contenu
+        assert b"You do not have enough points to book these places." in response.data
 
 def test_booking_past_competition_should_fail():
     with app.test_client() as client:

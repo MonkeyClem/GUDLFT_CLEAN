@@ -2,14 +2,15 @@ import json
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, flash, url_for
 from utils.utils import (
+    check_places_availability,
     exceed_club_points,
     find_club_by_email,
     find_club_by_name,
     is_competition_in_past,
-    is_points_balance_valid,
     exceeds_max_places_per_booking,
     load_clubs,
     load_competitions,
+    validate_places_request,
 )
 
 
@@ -65,26 +66,24 @@ def purchase_places():
     club_available_points = int(club["points"])
     competition_date = datetime.strptime(competition["date"], "%Y-%m-%d %H:%M:%S")
     if is_competition_in_past(competition_date):
-        flash("ERROR: This competition is not available anymore... Sorry")
+        flash("This competition is not available anymore... Sorry")
         return render_template(BOOKING_PAGE, club=club, competition=competition)
     places_required = int(request.form['places'])
-    error_msg = validate_places_request(places_required, int(competition['numberOfPlaces']))
+    error_msg = validate_places_request(places_required)
     if error_msg:
         flash(error_msg)
-        return redirect(url_for("book", competition=competition["name"], club=club))
+        return render_template(BOOKING_PAGE,competition=competition, club=club )
     if exceeds_max_places_per_booking(places_required):
-        flash("ERROR: You cannot book more than 12 places per competition.")
+        flash("You cannot book more than 12 places per competition.")
         return render_template(BOOKING_PAGE, club=club, competition=competition)
     if exceed_club_points(
         required_places=places_required, club_available_points=club_available_points
     ):
-        flash("ERROR: You do not have enough points to book these places.")
+        flash("You do not have enough points to book these places.")
         return render_template(BOOKING_PAGE, club=club, competition=competition)
-    if places_required <= 0:
-        flash("You must book at least 1 place")
-        return render_template(BOOKING_PAGE, club=club, competition=competition)
-    if places_required > int(competition["numberOfPlaces"]):
-        flash("Not enough places available")
+    error_msg = check_places_availability(places_required, competition)
+    if error_msg:
+        flash(error_msg)
         return render_template(BOOKING_PAGE, club=club, competition=competition)
     else:
         competition["numberOfPlaces"] = (

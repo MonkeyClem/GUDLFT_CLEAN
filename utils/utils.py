@@ -6,7 +6,6 @@ def load_clubs():
          list_of_clubs = json.load(c)['clubs']
          return list_of_clubs
 
-
 def load_competitions():
     with open('competitions.json') as comps:
          list_of_competitions = json.load(comps)['competitions']
@@ -36,9 +35,13 @@ def find_competition_by_name(name):
 def is_competition_in_past(competition_date): 
     return competition_date < datetime.now()
 
-def is_points_balance_valid(club: dict, places_required: int) -> bool:
-    club_points = int(club['points'])
-    if club_points >= places_required:
-        club['points'] = str(club_points - places_required) 
-        return True
-    return False
+
+def validate_places_request(places_required: int | str) -> str | None:
+    if places_required <= 0:
+        return "You must book at least 1 place."
+    return None
+
+def check_places_availability(places_required: int, competition: dict) -> str | None:
+    if places_required > int(competition["numberOfPlaces"]):
+        return "Not enough places available"
+    return None
