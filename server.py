@@ -1,59 +1,109 @@
 import json
-from flask import Flask,render_template,request,redirect,flash,url_for
-
-
-def loadClubs():
-    with open('clubs.json') as c:
-         listOfClubs = json.load(c)['clubs']
-         return listOfClubs
-
-
-def loadCompetitions():
-    with open('competitions.json') as comps:
-         listOfCompetitions = json.load(comps)['competitions']
-         return listOfCompetitions
+from datetime import datetime
+from flask import Flask, render_template, request, redirect, flash, url_for
+from utils.utils import (
+    check_places_availability,
+    exceed_club_points,
+    find_club_by_email,
+    find_club_by_name,
+    is_competition_in_past,
+    exceeds_max_places_per_booking,
+    load_clubs,
+    load_competitions,
+    validate_places_request,
+)
 
 
 app = Flask(__name__)
-app.secret_key = 'something_special'
+app.secret_key = "something_special"
 
-competitions = loadCompetitions()
-clubs = loadClubs()
+competitions = load_competitions()
+clubs = load_clubs()
 
-@app.route('/')
+
+WELCOME_PAGE = "welcome.html"
+BOOKING_PAGE = "booking.html"
+
+
+@app.route("/")
 def index():
-    return render_template('index.html')
-
-@app.route('/showSummary',methods=['POST'])
-def showSummary():
-    club = [club for club in clubs if club['email'] == request.form['email']][0]
-    return render_template('welcome.html',club=club,competitions=competitions)
+    return render_template("index.html")
 
 
-@app.route('/book/<competition>/<club>')
-def book(competition,club):
-    foundClub = [c for c in clubs if c['name'] == club][0]
-    foundCompetition = [c for c in competitions if c['name'] == competition][0]
-    if foundClub and foundCompetition:
-        return render_template('booking.html',club=foundClub,competition=foundCompetition)
+@app.route("/show_summary", methods=["POST"])
+def show_summary():
+    email = request.form["email"]
+    matched_club = find_club_by_email(email=email, clubs=clubs)
+    if matched_club is None:
+        flash("ERROR : Unknown e-mail")
+        return redirect(url_for("index"))
+    return render_template(WELCOME_PAGE, club=matched_club, competitions=competitions)
+
+
+@app.route("/book/<competition>/<club>")
+def book(competition, club):
+    found_club = next((c for c in clubs if c["name"] == club), None)
+    found_competition = [c for c in competitions if c["name"] == competition]
+    found_competition = found_competition[0] if found_competition else None
+    if found_club and found_competition:
+        return render_template(
+            BOOKING_PAGE, club=found_club, competition=found_competition
+        )
     else:
         flash("Something went wrong-please try again")
-        return render_template('welcome.html', club=club, competitions=competitions)
+        return render_template(WELCOME_PAGE, club=found_club, competitions=competitions)
+    
+
+@app.route("/purchase_places", methods=["POST"])
+def purchase_places():
+    competition_name = request.form["competition"]
+    competition = next((c for c in competitions if c["name"] == competition_name), None)
+    if not competition:
+        flash("ERROR: Competition not found.")
+        return redirect(url_for("index"))
+    club_name = request.form["club"]
+    club = find_club_by_name(club_name=club_name)
+    club_available_points = int(club["points"])
+    competition_date = datetime.strptime(competition["date"], "%Y-%m-%d %H:%M:%S")
+    if is_competition_in_past(competition_date):
+        flash("This competition is not available anymore... Sorry")
+        return render_template(BOOKING_PAGE, club=club, competition=competition)
+    places_required = request.form['places']
+    error_msg = validate_places_request(places_required)
+    if error_msg:
+        flash(error_msg)
+        return render_template(BOOKING_PAGE,competition=competition, club=club )
+    places_required = int(request.form['places'])
+    if exceeds_max_places_per_booking(places_required):
+        flash("You cannot book more than 12 places per competition.")
+        return render_template(BOOKING_PAGE, club=club, competition=competition)
+    if exceed_club_points(
+        required_places=places_required, club_available_points=club_available_points
+    ):
+        flash("You do not have enough points to book these places.")
+        return render_template(BOOKING_PAGE, club=club, competition=competition)
+    error_msg = check_places_availability(places_required, competition)
+    if error_msg:
+        flash(error_msg)
+        return render_template(BOOKING_PAGE, club=club, competition=competition)
+    else:
+        competition["numberOfPlaces"] = (
+            int(competition["numberOfPlaces"]) - places_required
+        )
+        club["points"] = club_available_points - places_required
+        flash("Great-booking complete!")
+        return render_template(WELCOME_PAGE, club=club, competitions=competitions)
 
 
-@app.route('/purchasePlaces',methods=['POST'])
-def purchasePlaces():
-    competition = [c for c in competitions if c['name'] == request.form['competition']][0]
-    club = [c for c in clubs if c['name'] == request.form['club']][0]
-    placesRequired = int(request.form['places'])
-    competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-placesRequired
-    flash('Great-booking complete!')
-    return render_template('welcome.html', club=club, competitions=competitions)
+@app.route("/clubs/points", methods=["GET"])
+def display_points():
+    return render_template("club_points.html", clubs=clubs)
 
 
-# TODO: Add route for points display
-
-
-@app.route('/logout')
+@app.route("/logout")
 def logout():
-    return redirect(url_for('index'))
+    return redirect(url_for("index"))
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
